@@ -12,6 +12,14 @@ func main() {
 		Cmd:      "init",
 		Callback: gitInit,
 		Helptext: "init .git directory",
+	}, r.Command{
+		Cmd:      "hash-file",
+		Callback: hash,
+		Helptext: "hash a file to sha256",
+	}, r.Command{
+		Cmd:      "cat-file",
+		Callback: catFile,
+		Helptext: "cat hashed file",
 	})
 	shell.Start()
 
