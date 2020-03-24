@@ -2,19 +2,47 @@ package main
 
 import (
 	"compress/zlib"
-	"crypto/sha256"
+	"crypto/sha512"
+	"encoding/hex"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
 )
 
-func hash(filename string) {
+func hashObject(filename string) string {
 	data, err := ioutil.ReadFile(filename)
 	if err != nil {
 		panic(err)
 	}
-	sum := sha256.Sum256(data)
-	println(sum[:])
+	sum := sha512.Sum512(data)
+	//NOTE, this should probably be returned as a [64]byte, but that is hard to deal with
+	return hex.EncodeToString(sum[:])
+}
+
+func writeObject(filename string) {
+	data, err := ioutil.ReadFile(filename)
+	if err != nil {
+		panic(err)
+	}
+	header := fmt.Sprint("blob ", len(data), '\000') //append header for git
+
+	sum := hashObject(filename)
+
+	dir := fmt.Sprint(".gogit/objects/", string(sum[:2]), "/")
+	os.MkdirAll(dir, 0755)
+
+	hashfile, err := os.Create(dir + string(sum[2:42]))
+	if err != nil {
+		panic(err)
+	}
+	defer hashfile.Close()
+
+	w := zlib.NewWriter(hashfile)
+	defer w.Close()
+	w.Write([]byte(header))
+	w.Write(data)
+
 }
 
 func catFile(filename string) {
