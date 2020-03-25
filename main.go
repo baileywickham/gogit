@@ -1,10 +1,17 @@
 package main
 
 import (
+	"io/ioutil"
 	"os"
 
 	r "github.com/baileywickham/runner"
+	"gopkg.in/yaml.v2"
 )
+
+type userConfig struct {
+	Name  string `yaml:"name"`
+	Email string `yaml:"email"`
+}
 
 func main() {
 	shell := r.NewShell()
@@ -41,6 +48,23 @@ func gitInit() {
 		panic(err)
 	}
 	// can ignore errors because we created the dir
-	file, _ := os.Create(".gogit/config")
+	file, _ := os.Create(".gogit/user.yaml")
+	data, err := yaml.Marshal(userconfig)
+	if err != nil {
+		panic(err)
+	}
+	file.Write(data)
+}
 
+func parseConfig() userConfig {
+	var user userConfig
+	data, err := ioutil.ReadFile(".gogit/user.yaml")
+	if err != nil {
+		panic(err)
+	}
+	err = yaml.Unmarshal(data, &user)
+	if err != nil {
+		panic(err)
+	}
+	return user
 }
