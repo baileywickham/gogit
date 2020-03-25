@@ -40,4 +40,7 @@ func gitInit() {
 	if err != nil {
 		panic(err)
 	}
+	// can ignore errors because we created the dir
+	file, _ := os.Create(".gogit/config")
+
 }
