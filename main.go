@@ -1,7 +1,7 @@
 package main
 
 import (
-	"io/ioutil"
+	"log"
 	"os"
 
 	r "github.com/baileywickham/runner"
@@ -39,8 +39,8 @@ func main() {
 }
 
 func gitInit() {
-	if _, err := os.Stat(".gogit/"); !os.IsNotExist(err) {
-		println("gogit directory already exists")
+	if inRepo(".") {
+		log.Fatal("already in gogit repo")
 		return
 	}
 	err := os.MkdirAll(".gogit/objects", 0755)
@@ -54,17 +54,4 @@ func gitInit() {
 		panic(err)
 	}
 	file.Write(data)
-}
-
-func parseConfig() userConfig {
-	var user userConfig
-	data, err := ioutil.ReadFile(".gogit/user.yaml")
-	if err != nil {
-		panic(err)
-	}
-	err = yaml.Unmarshal(data, &user)
-	if err != nil {
-		panic(err)
-	}
-	return user
 }

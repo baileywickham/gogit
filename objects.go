@@ -10,12 +10,8 @@ import (
 	"os"
 )
 
-func hashObject(filename string) string {
-	data, err := ioutil.ReadFile(filename)
-	if err != nil {
-		panic(err)
-	}
-	sum := sha512.Sum512(data)
+func hashObject(filename string, filedata []byte) string {
+	sum := sha512.Sum512(filedata)
 	//NOTE, this should probably be returned as a [64]byte, but that is hard to deal with
 	return hex.EncodeToString(sum[:])
 }
@@ -27,7 +23,7 @@ func writeObject(filename string) {
 	}
 	header := fmt.Sprint("blob ", len(data), '\000') //append header for git
 
-	sum := hashObject(filename)
+	sum := hashObject(filename, data)
 
 	dir := fmt.Sprint(".gogit/objects/", string(sum[:2]), "/")
 	os.MkdirAll(dir, 0755)
@@ -42,6 +38,10 @@ func writeObject(filename string) {
 	defer w.Close()
 	w.Write([]byte(header))
 	w.Write(data)
+
+}
+
+func addObjectToIndex(filename string) {
 
 }
 
