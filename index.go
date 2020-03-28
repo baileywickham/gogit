@@ -26,8 +26,10 @@ func inIndexByHash(hash string) bool {
 
 func readIndex() map[string]string {
 	index := make(map[string]string)
-	indexpath := gogitpath("index")
+	indexpath := gogitPath("index")
 	file, err := os.Open(indexpath)
+	defer file.Close()
+
 	if err != nil {
 		log.Fatal("No index file")
 	}
@@ -38,4 +40,15 @@ func readIndex() map[string]string {
 		index[line[0]] = line[1]
 	}
 	return index
+}
+
+func addToIndex(filename, hash string) {
+	indexpath := gogitPath("index")
+	file, err := os.Open(indexpath)
+	defer file.Close()
+
+	if err != nil {
+		panic(err)
+	}
+
 }

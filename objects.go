@@ -7,8 +7,18 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"os"
 )
+
+func add(objpath string) {
+	p := getAbsPath(objpath)
+	if notInRepo() {
+		log.Fatal("not in gogit repo")
+		return
+	}
+
+}
 
 func hashObject(filename string, filedata []byte) string {
 	sum := sha512.Sum512(filedata)
@@ -41,10 +51,6 @@ func writeObject(filename string) {
 
 }
 
-func addObjectToIndex(filename string) {
-
-}
-
 func catFile(filename string) {
 	//data, err := ioutil.ReadFile(filename)
 	file, err := os.Open(filename)
@@ -55,4 +61,4 @@ func catFile(filename string) {
 	defer r.Close()
 
 	io.Copy(os.Stdout, r)
-}
+
