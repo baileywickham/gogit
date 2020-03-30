@@ -39,7 +39,7 @@ func main() {
 }
 
 func gitInit() {
-	if inRepo(".") {
+	if wdInRepo() {
 		log.Fatal("already in gogit repo")
 		return
 	}

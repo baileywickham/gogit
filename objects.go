@@ -12,8 +12,7 @@ import (
 )
 
 func add(objpath string) {
-	p := getAbsPath(objpath)
-	if notInRepo() {
+	if !wdInRepo() {
 		log.Fatal("not in gogit repo")
 		return
 	}
@@ -61,4 +60,4 @@ func catFile(filename string) {
 	defer r.Close()
 
 	io.Copy(os.Stdout, r)
-
+}

@@ -10,3 +10,6 @@ An implimentation of Git in Go. Written to understand git and practice golang.
 - index.go
 - objects.go
 - tree.go
+
+## Resources
+- http://gitlet.maryrosecook.com/docs/gitlet.html
