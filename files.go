@@ -3,10 +3,11 @@ package main
 import (
 	"os"
 	"path"
+	"path/filepath"
 	"strings"
 )
 
-func gogitPathFromWD() string {
+func gogitAbsPathFromWD() string {
 	wd, err := os.Getwd()
 	if err != nil {
 		panic(err)
@@ -16,18 +17,27 @@ func gogitPathFromWD() string {
 }
 
 func wdInRepo() bool {
-	if gogitPathFromWD() == "" {
+	if gogitAbsPathFromWD() == "" {
 		return false
 	}
 	return true
 }
 
-// assumes we are in a gogit repo
+// gogitRelPath returns the path to a file relitive to the top level gogit repo
 func gogitRelPath(fdpath string) string {
-	return path.Join(gogitPathFromWD(), fdpath)
+	cwd, err := os.Getwd()
+	if err != nil {
+		panic(err)
+	}
+
+	// err should never occur
+	p, _ := filepath.Rel(gogitAbsPathFromWD(), path.Join(cwd, fdpath))
+
+	return p
 }
 
-// assumes we are in a gogit repo
+// Returns the path of the gogit directory, starting from dirpath.
+// For internal use only
 func gogitPath(dirpath string) string {
 	// this may cause bugs I'm not expecting?
 	if dirpath == "/" || dirpath == "" {

@@ -9,13 +9,47 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"path/filepath"
 )
 
-func add(objpath string) {
+func add(fdpath string) {
 	if !wdInRepo() {
 		log.Fatal("not in gogit repo")
 		return
 	}
+
+	files := make([]indexEntry, 0)
+
+	err := filepath.Walk(fdpath, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			log.Fatalf("error walking %s", path)
+			return nil
+		}
+		if info.IsDir() {
+			return nil
+		}
+
+		data, err := ioutil.ReadFile(path)
+		if err != nil {
+			log.Fatalf("error reading %s", path)
+			return err
+		}
+
+		hash := hashObject(path, data)
+
+		writeObject(path, hash, data)
+
+		files = append(files,
+			indexEntry{mode: info.Mode().String(),
+				filepath: path,
+				hash:     hash})
+		return nil
+	})
+	if err != nil {
+		panic(err)
+	}
+	// after walking directory, write index
+	writeIndex(files)
 
 }
 
@@ -25,32 +59,25 @@ func hashObject(filename string, filedata []byte) string {
 	return hex.EncodeToString(sum[:])
 }
 
-func writeObject(filename string) {
-	data, err := ioutil.ReadFile(filename)
-	if err != nil {
-		panic(err)
-	}
-	header := fmt.Sprint("blob ", len(data), '\000') //append header for git
+func writeObject(filename, hash string, filedata []byte) {
+	header := fmt.Sprint("blob ", len(filedata), '\000') //append header for git
 
-	sum := hashObject(filename, data)
-
-	dir := fmt.Sprint(".gogit/objects/", string(sum[:2]), "/")
+	dir := fmt.Sprint(".gogit/objects/", string(hash[:2]), "/")
 	os.MkdirAll(dir, 0755)
 
-	hashfile, err := os.Create(dir + string(sum[2:42]))
+	compfile, err := os.Create(dir + string(hash[2:42]))
 	if err != nil {
 		panic(err)
 	}
-	defer hashfile.Close()
+	defer compfile.Close()
 
-	w := zlib.NewWriter(hashfile)
+	w := zlib.NewWriter(compfile)
 	defer w.Close()
 	w.Write([]byte(header))
-	w.Write(data)
-
+	w.Write(filedata)
 }
 
-func catFile(filename string) {
+func catObjectFile(filename string) {
 	//data, err := ioutil.ReadFile(filename)
 	file, err := os.Open(filename)
 	if err != nil {

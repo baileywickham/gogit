@@ -27,11 +27,11 @@ func main() {
 		Helptext: "hash a file to sha256",
 	}, r.Command{
 		Cmd:      "cat-file",
-		Callback: catFile,
+		Callback: catObjectFile,
 		Helptext: "cat hashed file",
 	}, r.Command{
 		Cmd:      "add",
-		Callback: writeObject,
+		Callback: add,
 		Helptext: "add object",
 	})
 	shell.Start()
@@ -44,6 +44,10 @@ func gitInit() {
 		return
 	}
 	err := os.MkdirAll(".gogit/objects", 0755)
+	if err != nil {
+		panic(err)
+	}
+	_, err = os.Create(".gogit/index")
 	if err != nil {
 		panic(err)
 	}
