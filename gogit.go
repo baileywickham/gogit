@@ -34,7 +34,7 @@ func main() {
 		Callback: add,
 		Helptext: "add object",
 	})
-	shell.Start()
+	shell.Flags()
 
 }
 

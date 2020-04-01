@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"sort"
 	"strings"
 )
 
@@ -14,10 +15,7 @@ type indexEntry struct {
 	hash     string
 }
 
-func addOrUpdateIndex(path []string) {
-
-}
-
+// Takes slice of unsorted indexEntry structs
 func writeIndex(files []indexEntry) {
 	index := readIndex()
 	for _, file := range files {
@@ -30,13 +28,17 @@ func writeIndex(files []indexEntry) {
 	}
 	defer indexFile.Close()
 
-	// TODO sort index entry list
+	// Sort index to be in order
+	sort.Slice(files, func(i, j int) bool {
+		return files[i].filepath < files[j].filepath
+	})
+
 	for _, entry := range index {
-		writeIndexEntry(indexFile, entry)
+		writeIndexEntry(indexFile, &entry)
 	}
 }
 
-func writeIndexEntry(file *os.File, e indexEntry) {
+func writeIndexEntry(file *os.File, e *indexEntry) {
 	_, err := file.WriteString(fmt.Sprintf("%s %s %s\n", e.mode, e.filepath, e.hash))
 	if err != nil {
 		panic(err)
@@ -71,6 +73,7 @@ func readIndex() []indexEntry {
 
 	if err != nil {
 		log.Fatal("No index file")
+		return nil
 	}
 
 	sc := bufio.NewScanner(file)
