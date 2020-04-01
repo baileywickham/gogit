@@ -25,7 +25,7 @@ func add(fdpath string) {
 			log.Fatalf("error walking %s", path)
 			return nil
 		}
-		if info.IsDir() {
+		if info.IsDir() || info.Name() == ".gogit" {
 			return nil
 		}
 
@@ -41,7 +41,7 @@ func add(fdpath string) {
 
 		files = append(files,
 			indexEntry{mode: info.Mode().String(),
-				filepath: path,
+				filepath: gogitRelPath(path),
 				hash:     hash})
 		return nil
 	})
